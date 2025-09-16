@@ -23,7 +23,7 @@ if not os.path.exists(csv_file):
     exit(1)
 
 #Checking a TCP connection
-def check_conn(host, port, timeout=5):
+def check_conn(host, port, timeout=3):
     try:
         with socket.create_connection((host, int(port)), timeout=timeout):
          return True, ''
@@ -43,13 +43,17 @@ def run_conn_check(drdc_number, csv_file):
             return
         
         for row in reader:
-            service = row['ServiceName'].strip()
+            service = row['ServiceName']
             port = row['Port']
             host = row.get(drdc_number, '').strip()
 
             if not host:
-                status = ''
+                status = 'Connection skipped'
                 error='Missing Endpoint value'
+            
+            if not port:
+                status='Connection skipped'
+                error='Missing Port number'
             else:
                 success,error=check_conn(host,port)
                 status='Connection Successful' if success else 'Connection Failed'
@@ -61,8 +65,11 @@ def run_conn_check(drdc_number, csv_file):
             })
 
     print(f"\nConnectivity results for: {drdc_number} \n")
+    print(f"{'Service':<10} | {'Status':<8} | {'Error'}")
+
     for r in results:
-        print(f"{r['service']} --> {r['status']} {r['error']}")
+        print(f"{r['service']:<10} | {r['status']:<8} | {r['error']}")
+
 
 if __name__ == "__main__":
     run_conn_check(drdc_number,csv_file)
