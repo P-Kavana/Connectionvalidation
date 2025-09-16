@@ -1,3 +1,3 @@
 ServiceName,Port,DC61,DC32,DC34
-Audit Log Service,443,https://ca.als.services.cloud.sap,,
-Data Custodian,443,https://api-kms-ca1.datacustodian.cloud.sap,,
+Audit Log Service,443,ca.als.services.cloud.sap,,
+Data Custodian,443,api-kms-ca1.datacustodian.cloud.sap,,

@@ -43,15 +43,15 @@ def run_conn_check(drdc_number, csv_file):
             return
         
         for row in reader:
-            service = row['service'].strip()
+            service = row['ServiceName'].strip()
+            port = row['Port']
             host = row.get(drdc_number, '').strip()
-            port = row.get(drdc_number)
 
             if not host:
                 status = ''
                 error='Missing Endpoint value'
             else:
-                success,error=check_conn(host)
+                success,error=check_conn(host,port)
                 status='Connection Successful' if success else 'Connection Failed'
 
             results.append({
