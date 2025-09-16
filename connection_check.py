@@ -65,7 +65,7 @@ def run_conn_check(drdc_number, csv_file):
             })
 
     print(f"\nConnectivity results for: {drdc_number} \n")
-    print(f"{'Service':<10} | {'Status':<8} | {'Error'}")
+    print(f"{'ServiceName':<10} | {'Status':<8} | {'Error'}")
 
     for r in results:
         print(f"{r['service']:<10} | {r['status']:<8} | {r['error']}")
@@ -73,3 +73,4 @@ def run_conn_check(drdc_number, csv_file):
 
 if __name__ == "__main__":
     run_conn_check(drdc_number,csv_file)
+
