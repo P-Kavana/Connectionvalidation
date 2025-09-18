@@ -3,12 +3,8 @@ import socket
 import sys
 import os
 
-if len(sys.argv) < 2:
-    print("Missing DRDC Number")
-    sys.exit(1)
-
 if len(sys.argv) < 3:
-    print("error: Missing endpoint details to parse")
+    print("Usage: python connection_check.py <DRDC_NUMBER> <CSV_FILE>")
     sys.exit(1)
 
 drdc_number = sys.argv[1].upper()
@@ -31,7 +27,9 @@ def check_conn(host, port, timeout=3):
         return False,str(e)
 
 def run_conn_check(drdc_number, csv_file):
-    results = []
+    result = []
+    success_list = []
+    failed_list = []
     
     # Fetching the details from csv file
     with open(csv_file, newline='') as f:
@@ -45,32 +43,50 @@ def run_conn_check(drdc_number, csv_file):
         for row in reader:
             service = row['ServiceName']
             port = row['Port']
-            host = row.get(drdc_number, '').strip()
+            critical = row['Business Critical']
+            SF_Component = row['SF_Component']
+            host = row.get(drdc_number)
+
+            result = {
+                'service': service,
+                'critical':critical,
+                'SF_Component':SF_component,
+                'status': '',
+                'error': ''
+            }
 
             if not host:
-                status = 'Connection skipped'
-                error='Missing Endpoint value'
+                result['status'] = 'Connection skipped'
+                result['error'] = 'Missing Endpoint value'
+                failed_list.append(result)
             
-            if not port:
-                status='Connection skipped'
-                error='Missing Port number'
+            elif not port:
+                result['status'] = 'Connection skipped'
+                result['error'] = 'Missing Port number'
+                failed_list.append(result)
+
             else:
                 success,error=check_conn(host,port)
-                status='Connection Successful' if success else 'Connection Failed'
+                result['status'] = 'Success' if success else 'Failed'
+                result['error'] = error
 
-            results.append({
-                'service': service,
-                'status': status,
-                'error': error
-            })
+                if success:
+                    success_list.append(result)
+                else:
+                    failed_list.append(result)
 
-    print(f"\nConnectivity results for: {drdc_number} \n")
-    print(f"{'ServiceName':<10} | {'Status':<8} | {'Error'}")
 
-    for r in results:
-        print(f"{r['service']:<10} | {r['status']:<8} | {r['error']}")
+    if success_list:
+        print("\n✅ Successful Connections:")
+        print(f"{'ServiceName':<20} | {'SF_Component':<20} | {'Business Critical':<20} | {'status':<20}")
+        for s in success_list:
+            print(f"{s['service']:<20} | {s['SF_Component']:<20} | {s['critical']:<20} | {s['status']:<20}")
+    if failed_list:
+        print("\n❌ Failed Connections:")
+        print(f"{'ServiceName':<20} | SF_Component':<20} | {'Business Critical':<20} | {'status':<20} | {'Error'}")
+        for f in failed_list:
+            print(f"{f['service']:<20} | {s['SF_Component']:<20} | {s['critical']:<20} |{f['status']:<20} | {f['error']}")
 
 
 if __name__ == "__main__":
     run_conn_check(drdc_number,csv_file)
-
